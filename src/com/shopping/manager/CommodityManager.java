@@ -10,60 +10,50 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.shopping.MapUtil;
 import com.shopping.data.AbstractStorable;
-import com.shopping.data.Category;
+import com.shopping.entity.Commodity;
 
 public class CommodityManager extends AbstractStorable
 {
-    private static String                      CATEGORY = "Category";
+
+    private static String                       COMMODITIES = "commodities";
 
     /**
-     * Контейнер с категориями. Ключ - id категории
+     * Контейнер с товарами. Ключ - id категории
      */
-    private HashMap<Long, Category>            categoryMap;
+    private HashMap<Long, Commodity>            commodityMap;
 
     /**
-     * Контейнер содержит категории самого верхнего уровня. Ключ - название категории
+     * Контейнер хранит упорядоченный список товаров. Ключ - id родительской категории
      */
-    private TreeMap<String, Category>          baseCategoryMap;
+    private TreeMap<Long, SortedSet<Commodity>> commodityByParent;
 
-    /**
-     * Контейнер хранит упорядоченный список категорий. Ключ - id родительской категории
-     */
-    private TreeMap<Long, SortedSet<Category>> categoriesByParent;
+    private static MapUtil<Commodity>           mapUtil     = new MapUtil<Commodity>();
 
     @Override
     public JSONObject store() throws JSONException
     {
-        return null;
+        JSONObject state = new JSONObject();
+        JSONArray commodities = new JSONArray();
+        for (Entry<Long, Commodity> categoryEntry : commodityMap.entrySet())
+            commodities.put(categoryEntry.getValue().store());
+        state.put(COMMODITIES, commodities);
+        return state;
     }
 
     @Override
     public void restore(JSONObject state) throws JSONException
     {
-        JSONArray categoryArray = state.getJSONArray(CATEGORY);
-        for (int i = 0; i < categoryArray.length(); i++)
+        JSONArray commodityArray = state.getJSONArray(COMMODITIES);
+        for (int i = 0; i < commodityArray.length(); i++)
         {
-            Category category = new Category();
-            category.restore(categoryArray.getJSONObject(i));
-            categoryMap.put(category.getId(), category);
-        }
-        structureCategoryMap();
-    }
-
-    private void structureCategoryMap()
-    {
-        for (Entry<Long, Category> categoryEntry : categoryMap.entrySet())
-        {
-            Category category = categoryEntry.getValue();
-            if (category.getParent() == 0)
-                baseCategoryMap.put(category.getName(), category);
-            else
-            {
-                if (!categoriesByParent.containsKey(category.getParent()))
-                    categoriesByParent.put(category.getParent(), new TreeSet<Category>());
-                categoriesByParent.get(category.getParent()).add(category);
-            }
+            Commodity commodity = new Commodity();
+            commodity.restore(commodityArray.getJSONObject(i));
+            commodityMap.put(commodity.getId(), commodity);
+            if (!commodityByParent.containsKey(commodity.getParentCategory()))
+                commodityByParent.put(commodity.getParentCategory(), new TreeSet<Commodity>());
+            commodityByParent.get(commodity.getParentCategory()).add(commodity);
         }
     }
 }

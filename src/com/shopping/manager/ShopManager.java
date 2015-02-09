@@ -2,7 +2,6 @@ package com.shopping.manager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -12,6 +11,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
+import com.shopping.MapUtil;
 import com.shopping.data.AbstractStorable;
 import com.shopping.entity.Shop;
 
@@ -26,6 +26,8 @@ public class ShopManager extends AbstractStorable
     @SuppressLint("UseSparseArrays")
     private static HashMap<Long, Shop>   shopMap     = new HashMap<Long, Shop>();
 
+    private static MapUtil<Shop>         mapUtil     = new MapUtil<Shop>();
+
     public static Shop getShopById(long id)
     {
         return shopMap.get(id);
@@ -33,28 +35,18 @@ public class ShopManager extends AbstractStorable
 
     public static ArrayList<Shop> getShopListByName(String prefix)
     {
-        char nextLetter = (char) (prefix.charAt(prefix.length() - 1) + 1);
-        String end = prefix.substring(0, prefix.length() - 1) + nextLetter;
-        SortedMap<String, Shop> subMap = shopTreeMap.subMap(prefix.toLowerCase(), end.toLowerCase());
-        return mapToList(subMap);
+        SortedMap<String, Shop> subMap = mapUtil.prefixSubMap(shopTreeMap, prefix);
+        return mapUtil.mapToSortedList(subMap);
     }
 
     public ArrayList<Shop> getShopList()
     {
-        return mapToList(shopTreeMap);
+        return mapUtil.mapToSortedList(shopTreeMap);
     }
 
     public boolean contains(String name)
     {
         return shopMap.containsKey(name.trim());
-    }
-
-    private static ArrayList<Shop> mapToList(SortedMap<String, Shop> map)
-    {
-        ArrayList<Shop> shops = new ArrayList<Shop>(map.size());
-        for (Map.Entry<String, Shop> e : map.entrySet())
-            shops.add(e.getValue());
-        return shops;
     }
 
     @Override

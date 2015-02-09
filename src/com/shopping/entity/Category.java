@@ -1,17 +1,19 @@
-package com.shopping.data;
+package com.shopping.entity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.shopping.data.AbstractStorable;
+
 public class Category extends AbstractStorable
 {
-    private static String PARENT = "parent";
+    private static String PARENT         = "parent";
 
-    protected long        id     = 0;
+    protected long        id             = 0;
 
-    protected String      name   = new String();
+    protected String      name           = new String();
 
-    protected long        parent = 0;
+    protected long        parentCategory = 0;
 
     @Override
     public JSONObject store() throws JSONException
@@ -19,7 +21,7 @@ public class Category extends AbstractStorable
         JSONObject state = new JSONObject();
         state.put(ID, id);
         state.put(NAME, name);
-        state.put(PARENT, parent);
+        state.put(PARENT, parentCategory);
         return state;
     }
 
@@ -28,7 +30,7 @@ public class Category extends AbstractStorable
     {
         id = state.getLong(ID);
         name = state.getString(NAME);
-        parent = state.getLong(PARENT);
+        parentCategory = state.getLong(PARENT);
     }
 
     public String getName()
@@ -41,14 +43,14 @@ public class Category extends AbstractStorable
         this.name = categoryName;
     }
 
-    public long getParent()
+    public long getParentCategory()
     {
-        return parent;
+        return parentCategory;
     }
 
-    public void setParent(long parentCategory)
+    public void setParentCategory(long parentCategory)
     {
-        this.parent = parentCategory;
+        this.parentCategory = parentCategory;
     }
 
     public long getId()
