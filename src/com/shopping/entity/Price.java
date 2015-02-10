@@ -28,8 +28,6 @@ public class Price extends AbstractStorable
 
     private double       price;
 
-    private long         time;
-
     @Override
     public JSONObject store() throws JSONException
     {
@@ -37,7 +35,6 @@ public class Price extends AbstractStorable
         state.put(SHOP_ID, shopId);
         state.put(COMMODITY_ID, commodityId);
         state.put(PRICE, price);
-        state.put(TIME, time);
         return state;
     }
 
@@ -47,7 +44,6 @@ public class Price extends AbstractStorable
         shopId = state.getLong(SHOP_ID);
         commodityId = state.getLong(COMMODITY_ID);
         price = state.getDouble(PRICE);
-        time = state.getLong(TIME);
     }
 
     public long getShopId()
@@ -78,15 +74,5 @@ public class Price extends AbstractStorable
     public void setPrice(double price)
     {
         this.price = price;
-    }
-
-    public long getTime()
-    {
-        return time;
-    }
-
-    public void setTime(long time)
-    {
-        this.time = time;
     }
 }

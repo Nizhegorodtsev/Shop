@@ -10,9 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.shopping.MapUtil;
 import com.shopping.data.AbstractStorable;
 import com.shopping.entity.Category;
+import com.shopping.utils.MapUtils;
 
 public class CategoryManager extends AbstractStorable
 {
@@ -33,7 +33,7 @@ public class CategoryManager extends AbstractStorable
      */
     private TreeMap<Long, SortedSet<Category>> categoriesByParent;
 
-    private static MapUtil<Category>           mapUtil    = new MapUtil<Category>();
+    private static MapUtils<String, Category>  mapUtil    = new MapUtils<String, Category>();
 
     @Override
     public JSONObject store() throws JSONException

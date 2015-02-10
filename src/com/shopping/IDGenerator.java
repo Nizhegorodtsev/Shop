@@ -1,4 +1,4 @@
-package com.shopping.manager;
+package com.shopping;
 
 public class IDGenerator
 {
