@@ -1,5 +1,6 @@
 package com.shopping.entity;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -11,6 +12,12 @@ import com.shopping.data.AbstractStorable;
 import com.shopping.utils.MapUtils;
 import com.shopping.utils.TimeValuePair;
 
+/**
+ * Класс для хранения истории изменения цены товара в магазине
+ * 
+ * @author anizhegorodtsev
+ *
+ */
 public class PriceHistory extends AbstractStorable
 {
     private static String                        PRICE_HISTORY = "priceHistory";
@@ -52,6 +59,11 @@ public class PriceHistory extends AbstractStorable
             pair.restore(jsonHistory.getJSONObject(i));
             history.put(pair.getTime(), pair);
         }
+    }
+
+    public ArrayList<TimeValuePair> getHistory()
+    {
+        return mapUtils.mapToSortedList(history);
     }
 
     public long getShopId()

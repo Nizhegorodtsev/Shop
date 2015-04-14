@@ -1,81 +1,93 @@
 package com.shopping.manager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.shopping.data.AbstractStorable;
+import com.shopping.entity.Price;
 
+/**
+ * Класс содержит текущие цены на
+ * 
+ * @author anizhegorodtsev
+ *
+ */
 public class PriceManager extends AbstractStorable
 {
     /**
-     * Текущие цены
+     * Первый ключ - id магазина. Второй ключ - id товара. Значение - цена товара в магазине
      */
-    private HashMap<Long, Double>            currentPriceMap;
+    private HashMap<Long, HashMap<Long, Price>> priceByShop;
 
     /**
-     * История цен
+     * Первый ключ - id товара. Второй ключ - id магазина. Значение - цена товара в магазине
      */
-    private HashMap<Long, ArrayList<Double>> priceHistoryMap;
+    // private HashMap<Long, HashMap<Long, Price>> priceByCommodity;
 
-    private static String                    PRICE_ARRAY   = "priceArray";
+    /**
+     * По этому ключу хранится массив цен
+     */
+    private static String                       PRICE_ARRAY = "priceArray";
 
-    private static String                    CURRENT_PRICE = "currentPrice";
-
-    private static String                    PRICE_HISTORY = "priceHistory";
-
-    public double getPrice(long id)
+    /**
+     * Получить цену товара в магазине
+     * 
+     * @param shopId - магазин
+     * @param commodityId - товар
+     * @return - цена товара
+     */
+    public Price getPrice(long shopId, long commodityId)
     {
-        Double price = currentPriceMap.get(id);
-        if (price != null)
-            return price;
-        return 0;
+        return priceByShop.get(priceByShop).get(commodityId);
     }
 
-    public ArrayList<Double> getPriceHistory(long id)
+    public double getPriceHistory(long commodityId, long shopId)
     {
-        ArrayList<Double> history = priceHistoryMap.get(id);
-        if (history != null)
-            return new ArrayList<Double>(history);
-        return new ArrayList<Double>();
+        HashMap<Long, Price> map = priceByShop.get(shopId);
+        if (map == null)
+            return 0;
+        Price price = map.get(commodityId);
+        if (price == null)
+            return 0;
+        return price.getPrice();
     }
 
-    public void setPrice(long id, double price)
+    @Override
+    public JSONObject store() throws JSONException
     {
-        ArrayList<Double> history = priceHistoryMap.get(id);
-        if (history != null)
-            history.add(price);
-        else
-        {
-            history = new ArrayList<Double>();
-            history.add(price);
-            priceHistoryMap.put(id, history);
-        }
-        currentPriceMap.put(id, price);
+        JSONObject state = new JSONObject();
+        JSONArray pricaArray = new JSONArray();
+
+        for (Map.Entry<Long, HashMap<Long, Price>> priceMapEntry : priceByShop.entrySet())
+            for (Map.Entry<Long, Price> entry : priceMapEntry.getValue().entrySet())
+                pricaArray.put(entry.getValue().store());
+
+        state.put(PRICE_ARRAY, pricaArray);
+        return state;
     }
 
     @Override
     public void restore(JSONObject state) throws JSONException
     {
-        JSONArray array = state.getJSONArray(PRICE_ARRAY);
-        for (int i = 0; i < array.length(); i++)
+        JSONArray priceArray = state.getJSONArray(PRICE_ARRAY);
+        for (int i = 0; i < priceArray.length(); i++)
         {
-            JSONObject price = array.getJSONObject(i);
-            Double currentPrice = price.getDouble(CURRENT_PRICE);
-            JSONArray priceHistory = price.getJSONArray(PRICE_HISTORY);
-            ArrayList<Double> historyArray = new ArrayList<Double>(priceHistory.length());
-            for (int j = 0; j < priceHistory.length(); j++)
-                historyArray.add(priceHistory.getDouble(j));
+            JSONObject jsonPrice = priceArray.getJSONObject(i);
+            Price price = new Price();
+            price.restore(jsonPrice);
+            long shopId = price.getShopId();
+            long commodityId = price.getCommodityId();
+            if (!priceByShop.containsKey(shopId))
+                priceByShop.put(shopId, new HashMap<Long, Price>());
+            priceByShop.get(shopId).put(commodityId, price);
+            //
+            // if (!priceByCommodity.containsKey(commodityId))
+            // priceByCommodity.put(commodityId, new HashMap<Long, Price>());
+            // priceByCommodity.get(commodityId).put(shopId, price);
         }
     }
-
-    @Override
-    public JSONObject store()
-    {
-        return null;
-    }
-
 }

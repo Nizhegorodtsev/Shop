@@ -5,6 +5,12 @@ import org.json.JSONObject;
 
 import com.shopping.data.AbstractStorable;
 
+/**
+ * Информация о магазине
+ * 
+ * @author anizhegorodtsev
+ *
+ */
 public class Shop extends AbstractStorable
 {
     private long   id   = 0;

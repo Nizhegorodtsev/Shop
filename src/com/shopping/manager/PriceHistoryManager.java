@@ -1,5 +1,6 @@
 package com.shopping.manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,9 +8,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
 import com.shopping.data.AbstractStorable;
 import com.shopping.entity.PriceHistory;
+import com.shopping.utils.TimeValuePair;
 
+/**
+ * Менеджер хранит историю цен товаров в разных магазинов
+ * 
+ * @author anizhegorodtsev
+ *
+ */
+@SuppressLint("UseSparseArrays")
 public class PriceHistoryManager extends AbstractStorable
 {
     private static String                              PRICE_HISTORY = "priceHistory";
@@ -32,9 +43,7 @@ public class PriceHistoryManager extends AbstractStorable
         for (Map.Entry<Long, HashMap<Long, PriceHistory>> mapEntry : priceByShop.entrySet())
         {
             for (Map.Entry<Long, PriceHistory> entry : mapEntry.getValue().entrySet())
-            {
                 array.put(entry.getValue().store());
-            }
         }
         state.put(PRICE_HISTORY, array);
         return state;
@@ -58,4 +67,23 @@ public class PriceHistoryManager extends AbstractStorable
             priceByCommodity.get(history.getCommodityId()).put(history.getShopId(), history);
         }
     }
+
+    /**
+     * Получить историю цен на товар, упорядоченную по времени
+     * 
+     * @param commodityId
+     * @param shopId
+     * @return
+     */
+    public ArrayList<TimeValuePair> getPriceHistory(long commodityId, long shopId)
+    {
+        HashMap<Long, PriceHistory> map = priceByShop.get(shopId);
+        if (map == null)
+            return null;
+        PriceHistory history = map.get(commodityId);
+        if (history == null)
+            return null;
+        return history.getHistory();
+    }
+
 }
